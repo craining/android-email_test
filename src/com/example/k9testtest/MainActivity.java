@@ -1,12 +1,16 @@
 package com.example.k9testtest;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 
+import com.example.k9testtest.imap.ImapResponseParser.ImapResponse;
 import com.example.k9testtest.imap.ImapStore;
 import com.example.k9testtest.imap.ImapStore.ImapConnection;
 import com.example.k9testtest.imap.MessagingException;
@@ -36,9 +40,26 @@ public class MainActivity extends Activity {
 					connection = imap.getConnection();
 //					connection.executeSimpleCommand(String.format("CREATE \"%s\"", "testabcd"));
 //					connection.executeSimpleCommand(String.format("DELETE \"%s\"", "testabcd"));
-					connection.executeSimpleCommand("LIST \"\" *");
+					
+					
+					List<ImapResponse> responses = new ArrayList<ImapResponse>();
+					responses = connection.executeSimpleCommand("LIST \"\" *");
+					
+//					if(responses!=null) {
+//						for(ImapResponse res : responses) {
+//							Log.v("" , "response:" + res.toString());
+//						}
+//					}
+					
 					connection.executeSimpleCommand("Select inbox");
 					connection.executeSimpleCommand("Fetch 0:6 uid");
+					
+					connection.executeSimpleCommand("Fetch 0:6 body[HEADER.FIELDS (SUBJECT)]");
+					
+					
+					
+					
+					
 				} catch (MessagingException me) {
 					me.printStackTrace();
 				} catch (IOException ioe) {
