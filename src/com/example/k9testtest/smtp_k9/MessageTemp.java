@@ -5,21 +5,21 @@ public class MessageTemp {
 	
 	private String body = "";
 	
-	private AddressTemp[] from;
+	private Address[] from;
 
-	private AddressTemp[] to;
-	private AddressTemp[] cc;
-	private AddressTemp[] bcc;
+	private Address[] to = new Address[0];
+	private Address[] cc = new Address[0];
+	private Address[] bcc = new Address[0];
 
-	public AddressTemp[] getFrom() {
+	public Address[] getFrom() {
 		return from;
 	}
 
-	public void setFrom(AddressTemp[] fromAddrs) {
+	public void setFrom(Address[] fromAddrs) {
 		this.from = fromAddrs;
 	}
 
-	public AddressTemp[] getRecipients(int type) {
+	public Address[] getRecipients(int type) {
 		switch (type) {
 		case RecipientType.TO:
 
@@ -38,7 +38,7 @@ public class MessageTemp {
 		return null;
 	}
 
-	public void setRecipients(int type, AddressTemp[] addrs) {
+	public void setRecipients(int type, Address[] addrs) {
 		switch (type) {
 		case RecipientType.TO:
 
