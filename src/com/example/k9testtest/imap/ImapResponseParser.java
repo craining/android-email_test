@@ -10,6 +10,9 @@ import java.util.Locale;
 
 import android.util.Log;
 
+import com.example.k9testtest.common.MessagingException;
+import com.example.k9testtest.common.PeekableInputStream;
+
 public class ImapResponseParser {
 
 	private static final SimpleDateFormat mDateTimeFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss Z", Locale.US);

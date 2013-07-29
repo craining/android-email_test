@@ -25,13 +25,17 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 
-import android.app.Application;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.util.Base64;
 import android.util.Log;
 
 import com.example.k9testtest.MainActivity;
+import com.example.k9testtest.common.AuthenticationFailedException;
+import com.example.k9testtest.common.HexUtil;
+import com.example.k9testtest.common.MessagingException;
+import com.example.k9testtest.common.PeekableInputStream;
+import com.example.k9testtest.common.TrustManagerFactory;
 import com.example.k9testtest.imap.ImapResponseParser.ImapList;
 import com.example.k9testtest.imap.ImapResponseParser.ImapResponse;
 
@@ -86,6 +90,7 @@ public class ImapStore extends Store {
 	private static final String CAPABILITY_COMPRESS_DEFLATE = "COMPRESS=DEFLATE";
 	private static final String COMMAND_COMPRESS_DEFLATE = "COMPRESS DEFLATE";
 
+	//test
 	private String mHost = "imap.163.com";
 	private int mPort = 143;
 	private String mUsername = "devmail35@163.com";
