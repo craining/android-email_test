@@ -22,9 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -345,6 +343,7 @@ public class SmtpTransport extends Transport {
 
             // Eat the banner
             executeSimpleCommand(null);
+            
             InetAddress localAddress = mSocket.getLocalAddress();
             String localHost = localAddress.getCanonicalHostName();
             String ipAddr = localAddress.getHostAddress();
@@ -464,7 +463,6 @@ public class SmtpTransport extends Transport {
                 }
                 
             }
-            
         } catch (SSLException e) {
 //            throw new CertificateValidationException(e.getMessage(), e);
             e.printStackTrace();
@@ -561,6 +559,8 @@ public class SmtpTransport extends Transport {
 
         close();
         open();
+        
+        
 
 //        message.setEncoding(m8bitEncodingAllowed ? "8bit" : null);
         // If the message has attachments and our server has told us about a limit on
@@ -670,19 +670,25 @@ public class SmtpTransport extends Transport {
 //            if (sensitive && !K9.DEBUG_SENSITIVE) {
 //                commandToLog = "SMTP >>> *sensitive*";
 //            } else {
-                commandToLog = "SMTP >>> " + s;
+//                commandToLog = "SMTP >>> " + s;
 //            }
-            Log.d("SmtpTransport", commandToLog);
+//            Log.d("SmtpTransport", commandToLog);
 //        }
 
-        byte[] data = s.concat("\r\n").getBytes();
-
+            byte[] data = s.concat("\r\n").getBytes();
+//            byte[] data = s.getBytes();
+            
+            commandToLog = "SMTP >>> " + new String(data);
+            Log.d("SmtpTransport", commandToLog);
         /*
          * Important: Send command + CRLF using just one write() call. Using
          * multiple calls will likely result in multiple TCP packets and some
          * SMTP servers misbehave if CR and LF arrive in separate pakets.
          * See issue 799.
          */
+            
+    		Log.d("", "command=" + new String(data));
+            
         mOut.write(data);
         mOut.flush();
     }
@@ -771,8 +777,8 @@ public class SmtpTransport extends Transport {
         AuthenticationFailedException, IOException {
         try {
             executeSimpleCommand("AUTH LOGIN");
-            executeSimpleCommand(new String(Base64.encode(username.getBytes(), Base64.DEFAULT)), true);
-            executeSimpleCommand(new String(Base64.encode(password.getBytes(), Base64.DEFAULT)), true);
+            executeSimpleCommand(new String(Base64.encode(username.getBytes(), Base64.DEFAULT)));
+            executeSimpleCommand(new String(Base64.encode(password.getBytes(), Base64.DEFAULT)));
         } catch (MessagingException me) {
             if (me.getMessage().length() > 1 && me.getMessage().charAt(1) == '3') {
                 throw new AuthenticationFailedException("AUTH LOGIN failed (" + me.getMessage()
@@ -787,7 +793,7 @@ public class SmtpTransport extends Transport {
         byte[] data = ("\000" + username + "\000" + password).getBytes();
         data = Base64.encode(data, Base64.DEFAULT);
         try {
-            executeSimpleCommand("AUTH PLAIN " + new String(data), true);
+            executeSimpleCommand("AUTH PLAIN " + new String(data));
         } catch (MessagingException me) {
             if (me.getMessage().length() > 1 && me.getMessage().charAt(1) == '3') {
                 throw new AuthenticationFailedException("AUTH PLAIN failed (" + me.getMessage()
