@@ -3,13 +3,14 @@ package com.example.k9testtest.smtp_k9;
 public class MessageTemp {
 
 	
-	private String body = "";
+	private String body = "";//邮件体
+	private Address[] from;//发件人，必须与账户对应
 	
-	private Address[] from;
+	private MimeHeader headers;//邮件data里的字段，from:xxxx； to:xxx； subject:xxx；
 
-	private Address[] to = new Address[0];
-	private Address[] cc = new Address[0];
-	private Address[] bcc = new Address[0];
+	private Address[] to = new Address[0];//主送
+	private Address[] cc = new Address[0];//抄送
+	private Address[] bcc = new Address[0];//密送
 
 	public Address[] getFrom() {
 		return from;
@@ -19,6 +20,15 @@ public class MessageTemp {
 		this.from = fromAddrs;
 	}
 
+	public MimeHeader getHeaders() {
+		return headers;
+	}
+
+	
+	public void setHeaders(MimeHeader headers) {
+		this.headers = headers;
+	}
+	
 	public Address[] getRecipients(int type) {
 		switch (type) {
 		case RecipientType.TO:

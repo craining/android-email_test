@@ -2,8 +2,10 @@ package com.example.k9testtest.smtp_k9;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -245,10 +247,11 @@ public class SmtpTransport extends Transport {
 
     
     /**
-	 * smtp://user:password@server:port CONNECTION_SECURITY_NONE smtp+tls://user:password@server:port
-	 * CONNECTION_SECURITY_TLS_OPTIONAL smtp+tls+://user:password@server:port CONNECTION_SECURITY_TLS_REQUIRED
-	 * smtp+ssl+://user:password@server:port CONNECTION_SECURITY_SSL_REQUIRED
-	 * smtp+ssl://user:password@server:port CONNECTION_SECURITY_SSL_OPTIONAL
+	 * smtp://user:password@server:port CONNECTION_SECURITY_NONE <br/>
+	 * smtp+tls://user:password@server:port CONNECTION_SECURITY_TLS_OPTIONAL <br/>
+	 * smtp+tls+://user:password@server:port CONNECTION_SECURITY_TLS_REQUIRED <br/>
+	 * smtp+ssl+://user:password@server:port CONNECTION_SECURITY_SSL_REQUIRED <br/>
+	 * smtp+ssl://user:password@server:port CONNECTION_SECURITY_SSL_OPTIONAL <br/>
 	 * 
 	 * @param _uri
 	 */
@@ -310,6 +313,7 @@ public class SmtpTransport extends Transport {
             InetAddress[] addresses = InetAddress.getAllByName(mHost);
             for (int i = 0; i < addresses.length; i++) {
                 try {
+                	Log.v("TAG", "addresses=" + addresses[i] + "  mPort=" + mPort);
                     SocketAddress socketAddress = new InetSocketAddress(addresses[i], mPort);
                     if (mConnectionSecurity == CONNECTION_SECURITY_SSL_REQUIRED ||
                             mConnectionSecurity == CONNECTION_SECURITY_SSL_OPTIONAL) {
@@ -336,13 +340,11 @@ public class SmtpTransport extends Transport {
 
             // RFC 1047
             mSocket.setSoTimeout(SOCKET_READ_TIMEOUT);
-
             mIn = new PeekableInputStream(new BufferedInputStream(mSocket.getInputStream(), 1024));
             mOut = mSocket.getOutputStream();
 
             // Eat the banner
             executeSimpleCommand(null);
-
             InetAddress localAddress = mSocket.getLocalAddress();
             String localHost = localAddress.getCanonicalHostName();
             String ipAddr = localAddress.getHostAddress();
@@ -391,7 +393,6 @@ public class SmtpTransport extends Transport {
                     throw new MessagingException("TLS not supported but required");
                 }
             }
-
             boolean useAuthLogin = AUTH_LOGIN.equals(mAuthType);
             boolean useAuthPlain = AUTH_PLAIN.equals(mAuthType);
             boolean useAuthCramMD5 = AUTH_CRAM_MD5.equals(mAuthType);
@@ -461,7 +462,9 @@ public class SmtpTransport extends Transport {
                 } else {
                     throw new MessagingException("No valid authentication mechanism found.");
                 }
+                
             }
+            
         } catch (SSLException e) {
 //            throw new CertificateValidationException(e.getMessage(), e);
             e.printStackTrace();
@@ -573,6 +576,7 @@ public class SmtpTransport extends Transport {
         Address[] from = message.getFrom();
         try {
             //TODO: Add BODY=8BITMIME parameter if appropriate?
+//        	executeSimpleCommand("HELO devmail35");
             executeSimpleCommand("MAIL FROM:" + "<" + from[0].getAddress() + ">");
             for (String address : addresses) {
                 executeSimpleCommand("RCPT TO:" + "<" + address + ">");
@@ -586,6 +590,7 @@ public class SmtpTransport extends Transport {
                         1000)));
 
 //            message.writeTo(msgOut);
+            message.getHeaders().writeTo(msgOut);
             writeTo(msgOut, message.getBody(), m8bitEncodingAllowed ? "8bit" : "");
 
             // We use BufferedOutputStream. So make sure to call flush() !
@@ -880,6 +885,11 @@ public class SmtpTransport extends Transport {
 
 	private void writeTo(OutputStream out, String body, String encoding) throws IOException, MessagingException {
 		if (body != null) {
+//			executeSimpleCommand("\r\n");
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out), 1024);
+			writer.write("\r\n");
+			writer.flush();
+			Log.d("SmtpTransport", "write to  >>> " + body);
 			byte[] bytes = body.getBytes("UTF-8");
 			if ("8bit".equals(encoding)) {
 				out.write(bytes);

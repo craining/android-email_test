@@ -13,7 +13,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.example.k9testtest.MainActivity;
-import com.example.k9testtest.imap.DomainNameChecker;
 
 import android.app.Application;
 import android.content.Context;
