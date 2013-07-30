@@ -4,40 +4,36 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class SmtpDataStuffing extends FilterOutputStream
-{
-    private static final int STATE_NORMAL = 0;
-    private static final int STATE_CR = 1;
-    private static final int STATE_CRLF = 2;
+import android.util.Log;
 
-    private int state = STATE_NORMAL;
+public class SmtpDataStuffing extends FilterOutputStream {
 
-    public SmtpDataStuffing(OutputStream out)
-    {
-        super(out);
-    }
+	private static final int STATE_NORMAL = 0;
+	private static final int STATE_CR = 1;
+	private static final int STATE_CRLF = 2;
 
-    @Override
-    public void write(int oneByte) throws IOException
-    {
-        if (oneByte == '\r')
-        {
-            state = STATE_CR;
-        }
-        else if ((state == STATE_CR) && (oneByte == '\n'))
-        {
-            state = STATE_CRLF;
-        }
-        else if ((state == STATE_CRLF) && (oneByte == '.'))
-        {
-            // Read <CR><LF><DOT> so this line needs an additional period.
-            super.write('.');
-            state = STATE_NORMAL;
-        }
-        else
-        {
-            state = STATE_NORMAL;
-        }
-        super.write(oneByte);
-    }
+	private int state = STATE_NORMAL;
+
+	public SmtpDataStuffing(OutputStream out) {
+		super(out);
+	}
+
+	@Override
+	public void write(int oneByte) throws IOException {
+		if (oneByte == '\r') {
+			state = STATE_CR;
+			Log.v("SmtpDataStuffing", "oneByte= '\r'" );
+		} else if ((state == STATE_CR) && (oneByte == '\n')) {
+			state = STATE_CRLF;
+			Log.v("SmtpDataStuffing", "oneByte= '\n'" );
+		} else if ((state == STATE_CRLF) && (oneByte == '.')) {
+			Log.v("SmtpDataStuffing", "oneByte= '.'" );
+			// Read <CR><LF><DOT> so this line needs an additional period.
+			super.write('.');
+			state = STATE_NORMAL;
+		} else {
+			state = STATE_NORMAL;
+		}
+		super.write(oneByte);
+	}
 }

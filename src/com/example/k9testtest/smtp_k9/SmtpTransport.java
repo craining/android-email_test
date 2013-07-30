@@ -31,6 +31,7 @@ import javax.net.ssl.TrustManager;
 import org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
 
 import android.accounts.Account;
+import android.annotation.SuppressLint;
 import android.util.Base64;
 import android.util.Log;
 
@@ -463,6 +464,10 @@ public class SmtpTransport extends Transport {
                 }
                 
             }
+            mOut.flush();
+            mOut.write("NOOP \r\n".getBytes());
+            mOut.flush();
+            Log.e("", "readLine" + readLine());
         } catch (SSLException e) {
 //            throw new CertificateValidationException(e.getMessage(), e);
             e.printStackTrace();
@@ -664,35 +669,66 @@ public class SmtpTransport extends Transport {
         return ret;
     }
 
-    private void writeLine(String s, boolean sensitive) throws IOException {
-//        if (K9.DEBUG && K9.DEBUG_PROTOCOL_SMTP) {
-            final String commandToLog;
-//            if (sensitive && !K9.DEBUG_SENSITIVE) {
-//                commandToLog = "SMTP >>> *sensitive*";
-//            } else {
-//                commandToLog = "SMTP >>> " + s;
-//            }
+//    private void writeLine(String s, boolean sensitive) throws IOException {
+////        if (K9.DEBUG && K9.DEBUG_PROTOCOL_SMTP) {
+//            final String commandToLog;
+////            if (sensitive && !K9.DEBUG_SENSITIVE) {
+////                commandToLog = "SMTP >>> *sensitive*";
+////            } else {
+////                commandToLog = "SMTP >>> " + s;
+////            }
+////            Log.d("SmtpTransport", commandToLog);
+////        }
+//
+//            byte[] data = s.concat("\r\n").getBytes();
+////            byte[] data = s.getBytes();
+//            
+//            commandToLog = "SMTP >>> " + new String(data);
 //            Log.d("SmtpTransport", commandToLog);
-//        }
+//        /*
+//         * Important: Send command + CRLF using just one write() call. Using
+//         * multiple calls will likely result in multiple TCP packets and some
+//         * SMTP servers misbehave if CR and LF arrive in separate pakets.
+//         * See issue 799.
+//         */
+//            
+//    		Log.d("", "command=" + new String(data));
+//            
+//        mOut.write(data);
+//        mOut.flush();
+//    }
 
-            byte[] data = s.concat("\r\n").getBytes();
-//            byte[] data = s.getBytes();
-            
-            commandToLog = "SMTP >>> " + new String(data);
-            Log.d("SmtpTransport", commandToLog);
-        /*
-         * Important: Send command + CRLF using just one write() call. Using
-         * multiple calls will likely result in multiple TCP packets and some
-         * SMTP servers misbehave if CR and LF arrive in separate pakets.
-         * See issue 799.
-         */
-            
-    		Log.d("", "command=" + new String(data));
-            
-        mOut.write(data);
-        mOut.flush();
-    }
+    
+	private void writeLine(String s) throws IOException {
+//		if (K9.DEBUG)
+			Log.e("SmtpTransport", "SMTP... >>> " + s);
 
+		/*
+		 * Note: We can use the string length to compute the buffer size since only ASCII characters are
+		 * allowed in SMTP commands i.e. this string will never contain multi-byte characters.
+		 */
+//		int len = s.length();
+//		byte[] data = new byte[len + 2];
+//		s.getBytes(0, len, data, 0);
+//		data[len + 0] = '\r';
+//		data[len + 1] = '\n';
+
+		
+		 byte[] data = s.concat("\r\n").getBytes();
+//		 byte[] data = s.getBytes();
+		
+		/*
+		 * Important: Send command + CRLF using just one write() call. Using multiple calls will likely result
+		 * in multiple TCP packets and some SMTP servers misbehave if CR and LF arrive in separate pakets. See
+		 * issue 799.
+		 */
+		
+		Log.d("", "command=" + new String(data));
+		
+		mOut.write(data);
+		mOut.flush();
+	}
+	
     private void checkLine(String line) throws MessagingException {
         int length = line.length();
         if (length < 1) {
@@ -727,7 +763,7 @@ public class SmtpTransport extends Transport {
     throws IOException, MessagingException {
         List<String> results = new ArrayList<String>();
         if (command != null) {
-            writeLine(command, sensitive);
+            writeLine(command);
         }
 
         /*
@@ -773,7 +809,8 @@ public class SmtpTransport extends Transport {
 //    C: w3ld0n
 //    S: 235 2.0.0 OK Authenticated
 
-    private void saslAuthLogin(String username, String password) throws MessagingException,
+    @SuppressLint("NewApi")
+	private void saslAuthLogin(String username, String password) throws MessagingException,
         AuthenticationFailedException, IOException {
         try {
             executeSimpleCommand("AUTH LOGIN");
@@ -788,7 +825,8 @@ public class SmtpTransport extends Transport {
         }
     }
 
-    private void saslAuthPlain(String username, String password) throws MessagingException,
+    @SuppressLint("NewApi")
+	private void saslAuthPlain(String username, String password) throws MessagingException,
         AuthenticationFailedException, IOException {
         byte[] data = ("\000" + username + "\000" + password).getBytes();
         data = Base64.encode(data, Base64.DEFAULT);
@@ -824,7 +862,8 @@ public class SmtpTransport extends Transport {
 //    }
 
     
-    private void saslAuthCramMD5(String username, String password) throws MessagingException, AuthenticationFailedException, IOException {
+    @SuppressLint("NewApi")
+	private void saslAuthCramMD5(String username, String password) throws MessagingException, AuthenticationFailedException, IOException {
 		List<String> respList = executeSimpleCommand("AUTH CRAM-MD5");
 		if (respList.size() != 1)
 			throw new AuthenticationFailedException("Unable to negotiate CRAM-MD5");
